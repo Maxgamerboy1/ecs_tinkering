@@ -16,6 +16,7 @@ struct OutputConnection {
 #[derive(Clone, Copy)]
 enum ItemType {
     Iron,
+    Coal,
 }
 
 #[derive(Component, Clone, Copy)]
@@ -33,6 +34,18 @@ fn main() -> ! {
     println!("Hello, world!");
     let mut world = World::new();
 
+    setup_world(&mut world);
+
+    let mut schedule = Schedule::default();
+    schedule.add_systems(move_items);
+
+    loop {
+        schedule.run(&mut world);
+        sleep(Duration::from_secs(2));
+    }
+}
+
+fn setup_world(world: &mut World) {
     world.spawn((
         Storage,
         InputConnection { dir: 0 },
@@ -51,6 +64,7 @@ fn main() -> ! {
         InputConnection { dir: 180 },
         OutputConnection { dir: 90 },
         Location(Vec2 { x: 1., y: 1. }),
+        StorableItem(ItemType::Coal),
     ));
     world.spawn((
         Storage,
@@ -65,14 +79,6 @@ fn main() -> ! {
         OutputConnection::default(),
         Location(Vec2 { x: 0., y: 10. }),
     ));
-
-    let mut schedule = Schedule::default();
-    schedule.add_systems(move_items);
-
-    loop {
-        schedule.run(&mut world);
-        sleep(Duration::from_secs(2));
-    }
 }
 
 fn move_items(
